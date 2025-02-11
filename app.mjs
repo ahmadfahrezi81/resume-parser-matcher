@@ -2,9 +2,8 @@ import express from "express";
 
 const app = express();
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
     res.send("Hello Worlds!");
-    res.send("hello 2");
 });
 
 const PORT = process.env.PORT || 3000;
