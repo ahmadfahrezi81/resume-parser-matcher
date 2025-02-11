@@ -19,6 +19,8 @@ function App() {
     const formData = new FormData();
     formData.append('file', file);
 
+    //TODO: Add file type validation and error handling
+
     try {
       const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
