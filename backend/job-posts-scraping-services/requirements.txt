@@ -1,0 +1,2 @@
+Crawl4AI==0.4.248
+pydantic==2.10.6
