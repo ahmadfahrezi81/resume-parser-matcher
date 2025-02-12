@@ -4,6 +4,7 @@ import cors from 'cors';
 import { PDFExtract } from 'pdf.js-extract';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -19,6 +20,19 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+
+const s3 = new S3Client({
+  region: bucketRegion,
+  credentials: {
+    accessKeyId: accessKey,
+    secretAccessKey: secretAccessKey,
+  },
+})
+
 // Set up Multer storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -31,6 +45,22 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     // Extract text from PDF
     const data = await pdfExtract.extractBuffer(req.file.buffer);
+
+    // Upload PDF to S3
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: req.file.originalname,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    })
+
+    const result = await s3.send(command);
+
+    if (result.$metadata.httpStatusCode !== 200) {
+      throw new Error('Error uploading file to S3');
+    }
+    
+    console.log('Successfully uploaded file to S3');
 
     // Combine all pages text
     const fullText = data.pages
@@ -54,7 +84,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
           content: fullText,
         },
       ],
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o-mini',
     });
 
     // Get the parsed JSON response
