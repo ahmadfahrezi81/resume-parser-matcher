@@ -5,14 +5,20 @@
     "main": "app.mjs",
     "type": "module",
     "scripts": {
-        "start": "node app.mjs"
+        "start": "nodemon app.mjs"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.744.0",
         "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
         "express": "^4.21.2",
-        "multer": "^1.4.5-lts.1"
+        "multer": "^1.4.5-lts.1",
+        "openai": "^4.83.0",
+        "pdf-parse": "^1.1.1",
+        "pdf.js-extract": "^0.2.1",
+        "pdfjs-dist": "^4.10.38"
     }
 }

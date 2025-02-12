@@ -1,14 +1,15 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
-import './App.css';
+import { Button } from './components/ui/button';
 
 const API_BASE_URL = 'http://localhost:6767';
 
 function App() {
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File>();
+  const [loading, setLoading] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       setFile(acceptedFiles[0]);
     }
@@ -22,34 +23,38 @@ function App() {
     //TODO: Add file type validation and error handling
 
     try {
+      setLoading(true);
       const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       console.log('Upload successful:', response.data);
+      setLoading(false);
     } catch (error) {
       console.error('Upload failed:', error);
+      setLoading(false);
     }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: 'application/pdf',
+    multiple: false
   });
 
   return (
-    <div className="App">
-      <div {...getRootProps({ className: 'dropzone' })}>
+    <div className="m-auto p-[2rem] text-center">
+      <div {...getRootProps()} className='border-dashed border-[5px] p-20 text-center cursor-pointer text-xl'>
         <input {...getInputProps()} />
         {isDragActive ? (
-          <p>Drop the files here ...</p>
+          <p className='text-xl'>Drop the files here ...</p>
         ) : (
           <p>Drag & drop or click to select files</p>
         )}
       </div>
       {file && (
-        <div>
+        <div className='py-3'>
           <p>Selected File: {file.name}</p>
-          <button onClick={handleUpload}>Upload</button>
+          <Button onClick={handleUpload} disabled={loading}>Upload</Button>
         </div>
       )}
     </div>
